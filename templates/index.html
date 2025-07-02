@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>ダミーセンサーモニター</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .monitor { background-color: white; padding: 2em 3em; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 600px; }
+        h1 { color: #007bff; border-bottom: 2px solid #eee; padding-bottom: 0.5em; margin-bottom: 1em; }
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5em; }
+        .data-card { background-color: #f8f9fa; padding: 1.5em; border-radius: 10px; border-left: 5px solid #007bff; }
+        .data-card h2 { margin: 0 0 0.5em 0; font-size: 1.1em; color: #555; }
+        .data-card p { margin: 0; font-size: 2.2em; font-weight: bold; color: #333; }
+        .status { margin-top: 2em; color: #666; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="monitor">
+        <h1>ダミーセンサー リアルタイムモニター</h1>
+        <div class="data-grid">
+            <div class="data-card">
+                <h2>温度</h2>
+                <p><span id="temp">--</span> °C</p>
+            </div>
+            <div class="data-card">
+                <h2>湿度</h2>
+                <p><span id="hum">--</span> %</p>
+            </div>
+            <div class="data-card">
+                <h2>気圧</h2>
+                <p><span id="pres">--</span> hPa</p>
+            </div>
+            <div class="data-card">
+                <h2>ガス抵抗</h2>
+                <p><span id="gas">--</span> Ohm</p>
+            </div>
+        </div>
+        <p class="status" id="status">サーバーに接続中...</p>
+    </div>
+
+    <!-- リアルタイム通信を行うためのJavaScriptライブラリ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        // サーバーとの接続を開始
+        const socket = io();
+
+        // 接続が成功したときの処理
+        socket.on('connect', () => {
+            document.getElementById('status').textContent = '接続完了！データを受信中...';
+        });
+
+        // サーバーから 'update_data' イベントが送られてきたときの処理
+        socket.on('update_data', (data) => {
+            // 受け取ったデータで画面の数値を更新する
+            document.getElementById('temp').textContent = data.temp;
+            document.getElementById('hum').textContent = data.hum;
+            document.getElementById('pres').textContent = data.pres;
+            document.getElementById('gas').textContent = data.gas;
+        });
+
+        // サーバーから切断されたときの処理
+        socket.on('disconnect', () => {
+            document.getElementById('status').textContent = 'サーバーから切断されました。';
+        });
+    </script>
+</body>
+</html>
